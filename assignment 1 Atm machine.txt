@@ -1,0 +1,206 @@
+﻿// assignment 1 done by rishi kumar jha ,rno 2301997236 , BCA 2A 
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
+
+class Account {
+private:
+    string a;
+    string b;
+    double c;
+
+public:
+    Account(string _a, string _b) : a(_a), b(_b), c(0) {}
+
+    string getA() const {
+        return a;
+    }
+
+    bool validateB(string _b) const {
+        return b == _b;
+    }
+
+    double getC() const {
+        return c;
+    }
+
+    void d(double amount) {
+        c += amount;
+    }
+
+    bool w(double amount) {
+        if (amount > c)
+            return false;
+        c -= amount;
+        return true;
+    }
+};
+
+class ATM {
+private:
+    vector<Account> accounts;
+
+public:
+    void loadAccounts() {
+        ifstream file("accounts.txt");
+        if (!file) {
+            cerr << "Error: Unable to open accounts file." << endl;
+            return;
+        }
+
+        string a, b;
+        while (file >> a >> b) {
+            accounts.emplace_back(a, b);
+        }
+        file.close();
+    }
+
+    void saveAccounts() {
+        ofstream file("accounts.txt");
+        if (!file) {
+            cerr << "Error: Unable to open accounts file." << endl;
+            return;
+        }
+
+        for (const auto& account : accounts) {
+            file << account.getA() << " " << account.getC() << endl;
+        }
+        file.close();
+    }
+
+    Account* findAccount(const string& a) {
+        auto it = find_if(accounts.begin(), accounts.end(), [&](const Account& acc) {
+            return acc.getA() == a;
+        });
+        return (it != accounts.end()) ? &(*it) : nullptr;
+    }
+
+    bool a(const string& a, const string& b) {
+        Account* account = findAccount(a);
+        return (account && account->validateB(b));
+    }
+
+    void b(const string& a, const string& b) {
+        if (findAccount(a)) {
+            cout << "Error: Account already exists." << endl;
+            return;
+        }
+        accounts.emplace_back(a, b);
+        saveAccounts();
+        cout << "Thank You! Your account has been created!" << endl;
+    }
+
+    void c(const string& a) {
+        Account* account = findAccount(a);
+        if (!account) {
+            cerr << "Error: Account not found." << endl;
+            return;
+        }
+
+        char choice;
+        while (true) {
+            cout << "d -> Deposit Money" << endl;
+            cout << "w -> Withdraw Money" << endl;
+            cout << "r -> Request Balance" << endl;
+            cout << "q -> Quit" << endl;
+            cout << "> ";
+            cin >> choice;
+
+            switch (choice) {
+                case 'd':
+                case 'D': {
+                    double amount;
+                    cout << "Amount of deposit: $";
+                    cin >> amount;
+                    account->d(amount);
+                    saveAccounts();
+                    cout << "Deposit successful." << endl;
+                    break;
+                }
+                case 'w':
+                case 'W': {
+                    double amount;
+                    cout << "Amount of withdrawal: $";
+                    cin >> amount;
+                    if (account->w(amount)) {
+                        saveAccounts();
+                        cout << "Withdrawal successful." << endl;
+                    } else {
+                        cout << "Error: Insufficient funds." << endl;
+                    }
+                    break;
+                }
+                case 'r':
+                case 'R':
+                    cout << "Your balance is $" << fixed << setprecision(2) << account->getC() << endl;
+                    break;
+                case 'q':
+                case 'Q':
+                    cout << "Thanks for stopping by!" << endl;
+                    return;
+                default:
+                    cout << "Invalid choice! Please try again." << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    ATM atm;
+    atm.loadAccounts();
+
+    char choice;
+    while (true) {
+        cout << "Hi! Welcome to Mr.Rishi'sATMagic's ATM Machine!" << endl;
+        cout << "Please select an option from the menu below:" << endl;
+        cout << "I -> Login" << endl;
+        cout << "C -> Create New Account" << endl;
+        cout << "Q -> Quit" << endl;
+        cout << "> ";
+        cin >> choice;
+
+        switch (choice) {
+            case 'I':
+            case 'i': {
+                string a, b;
+                cout << "Please enter your user id: ";
+                cin >> a;
+                cout << "Please enter your password: ";
+                cin >> b;
+                if (atm.a(a, b)) {
+                    cout << "Access Granted!" << endl;
+                    atm.c(a);
+                } else {
+                    cout << "******** LOGIN FAILED! ********" << endl;
+                }
+                break;
+            }
+            case 'C':
+            case 'c': {
+                string a, b;
+                cout << "Please enter your user id: ";
+                cin >> a;
+                cout << "Please enter your password: ";
+                cin >> b;
+                atm.b(a, b);
+                break;
+            }
+            case 'Q':
+            case 'q':
+                cout << "Thanks for stopping by!" << endl;
+                cout <<"Put you card have nice day :)" << endl;
+                cout <<"thanks for visiting Mr.Rishi'sATMagic ATM Machine! " << endl;
+                return 0;
+            default:
+                cout << "Invalid choice! Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
